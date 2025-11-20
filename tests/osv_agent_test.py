@@ -750,16 +750,15 @@ def testRunOsvDirectory_whenGoModFile_scansDirectory(
 
     mock_subprocess = mocker.Mock()
     mock_subprocess.stdout = fake_go_osv_output
-    mocker.patch("subprocess.run", return_value=mock_subprocess)
+    mock_subprocess_run = mocker.patch("subprocess.run", return_value=mock_subprocess)
     mocker.patch("agent.hotpatch.hotpatch", return_value=("go.mod", go_mod_content))
 
     result = osv_agent._run_osv_directory(go_mod_path, go_mod_content)
 
     assert result is not None
     assert result == fake_go_osv_output
-    subprocess_call = subprocess.run
-    assert subprocess_call.call_count == 1
-    call_args = subprocess_call.call_args
+    assert mock_subprocess_run.call_count == 1
+    call_args = mock_subprocess_run.call_args
     assert call_args[0][0][0] == "/usr/local/bin/osv-scanner"
     assert call_args[0][0][1] == "--format"
     assert call_args[0][0][2] == "json"
